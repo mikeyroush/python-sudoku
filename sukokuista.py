@@ -18,6 +18,7 @@ class sudokuGui(Scene):
 		self.fitScreen()
 		self.board.path = self.square
 		self.board.position = self.boardPos
+		self.board.placeSpaces()
 		
 	def fitScreen(self):
 		#calc dimensions

@@ -1,6 +1,5 @@
 from scene import *
-from colorsys import rgb_to_hls, hls_to_rgb
-from matplotlib.colors import hex2color
+from adjustColor import *
 import math
 
 class Space(ShapeNode):
@@ -25,31 +24,21 @@ class Space(ShapeNode):
 	def fill(self, char):
 		self.locked = True
 		self.charactar.text = str(char)
-		self.adjustColor(1.2)
+		self.fill_color = adjustColor(self.hex, 1.2)
 		
 	def activate(self):
-		self.adjustColor(0.75)
-		#self.fill_color = 'grey'
+		self.fill_color = adjustColor(self.hex, 0.75)
 		
 	def deactivate(self):
-		self.fill_color = self.parent.fill_color
-		
-	def adjustColor(self,factor):
-		#convert hex to hls
-		(r,g,b) = hex2color(self.hex)
-		(h,l,s) = rgb_to_hls(r,g,b)
-		#adjust color
-		l = max(min(l * factor, 1.0), 0.0)
-		#convert back
-		(r,g,b) = hls_to_rgb(h,l,s)
-		(r,g,b) = int(r*255),int(g*255),int(b*255)
-		hex = '#{:02x}{:02x}{:02x}'.format(r,g,b)
-		self.fill_color = hex
+		self.fill_color = self.hex
 		
 class Border(ShapeNode):
-	def __init__(self,dimensions,*args,**kwargs):
+	def __init__(self,*args,**kwargs):
 		ShapeNode.__init__(self,*args,**kwargs)
-		(x,y,dx,dy) = dimensions
+		self.dimensions = tuple(None for _ in range(4))
+		
+	def draw(self):
+		(x,y,dx,dy) = self.dimensions
 		#draw line and return ShapeNode
 		line = ui.Path()
 		line.line_width = 10
@@ -64,14 +53,18 @@ class Board(ShapeNode):
 		ShapeNode.__init__(self,*args,**kwargs)
 		self.fill_color = hex
 		(self.rows,self.cols) = layout
-		self.rowSize = self.size.h/self.rows
-		self.colSize = self.size.w/self.cols
+		self.divsX = int(math.sqrt(self.cols))
+		self.divsY = int(math.sqrt(self.rows))
 		self.spaces = [Space((j,i),hex,stroke_color=self.stroke_color,parent=self) for i in range(self.cols) for j in range(self.rows)]
+		self.vertBorders = [Border(parent=self,stroke_color=self.stroke_color) for _ in range(1,self.divsX)]
+		self.horzBorders = [Border(parent=self,stroke_color=self.stroke_color) for _ in range(1,self.divsY)]
 		self.activeSpace = None		
 		self.placeSpaces()
 		self.placeBorders()
 		
 	def placeSpaces(self):	
+		self.rowSize = self.size.h/self.rows
+		self.colSize = self.size.w/self.cols
 		for space in self.spaces:
 			square = ui.Path.rect(0,0,self.rowSize,self.colSize)
 			pos = self.calcDimensions(space.index)
@@ -79,17 +72,17 @@ class Board(ShapeNode):
 			space.position = pos
 			
 	def placeBorders(self):
-		divsX = int(math.sqrt(self.cols))
-		divsY = int(math.sqrt(self.rows))
-		for i in range(1,divsX):
-			x = i*self.size.w/divsX - self.size.w/2
+		for i, border in enumerate(self.vertBorders,1):
+			x = i*self.size.w/self.divsX - self.size.w/2
 			dimensions = (x,0,0,self.size.h)
-			border = Border(dimensions,parent=self,stroke_color=self.stroke_color)
-		for j in range(1,divsY):
-			y = j*self.size.h/divsY - self.size.h/2
+			border.dimensions = dimensions
+			border.draw()
+		for j, border in enumerate(self.horzBorders,1):
+			y = j*self.size.h/self.divsY - self.size.h/2
 			dimensions = (0,y,self.size.w,0)
-			border = Border(dimensions,parent=self,stroke_color=self.stroke_color)
-				
+			border.dimensions = dimensions
+			border.draw()
+							
 	def calcDimensions(self,index):
 		(j,i) = index
 		x = -self.size.w/2 + self.rowSize/2 + i*self.rowSize
