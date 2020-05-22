@@ -45,6 +45,7 @@ class sudokuGui(Scene):
 		self.square = ui.Path.rect(0,0,size,size)
 		
 		#calc dimensions for keypad
+		#needs some work
 		if muchLarger(self.size.h,self.size.w):
 			height = math.floor(0.9 * sideDiff)
 			width = 4*height/3
@@ -56,8 +57,13 @@ class sudokuGui(Scene):
 		self.rect = ui.Path.rect(0,0,width,height)			
 	
 	def touch_began(self,touch):
-		self.board.isSpacePressed(touch)
-		self.keyPad.isButtonPressed(touch)
+		if self.board.isSpacePressed(touch) and self.keyPad.activeButton and self.keyPad.activeButton.id == 'erase':
+			self.board.activeSpace.charactar.text = ""
+		self.keyPad.isModeButtonPressed(touch)
+		if self.keyPad.activeButton and self.keyPad.activeButton.id == 'write' and self.board.activeSpace:
+			numberButton = self.keyPad.isNumberButtonPressed(touch)
+			if numberButton:
+				self.board.activeSpace.charactar.text = str(numberButton.id)
 		
 	def touch_ended(self,touch):
 		self.keyPad.isNotPressed()

@@ -97,6 +97,7 @@ class Board(ShapeNode):
 		for space in self.spaces:
 			if space.isPressed(point):
 				self.makeActive(space)
+				return True
 				
 	def makeActive(self, space):
 		if self.activeSpace:

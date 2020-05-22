@@ -38,10 +38,14 @@ class KeyPad(ShapeNode):
 			x = -self.size.w/2 + self.buttonSize/2 + i%3*self.buttonSize
 			button.position = (x,y)
 			
-	def isButtonPressed(self,touch):
+	def isNumberButtonPressed(self,touch):
 		point = self.point_from_scene(touch.location)
 		for button in self.numberButtons:
-			button.isPressed(point)
+			if button.isPressed(point):
+				return button
+		
+	def isModeButtonPressed(self,touch):
+		point = self.point_from_scene(touch.location)
 		for button in self.modeButtons:
 			if button.isPressed(point) and button != self.activeButton:
 				self.makeActive(button)
@@ -55,19 +59,3 @@ class KeyPad(ShapeNode):
 		if self.activeButton:
 			self.activeButton.deactivate()
 		self.activeButton = button
-	
-class Test(Scene):
-	def setup(self):
-		hex = '#1768ff'
-		self.background_color = '#1768ff'
-		rect = ui.Path.rect(0,0,600,800)
-		pos = (self.size.w/2, self.size.h/2)
-		self.keypad = KeyPad(hex, rect, stroke_color = 'white', fill_color = 'clear', parent = self, position = pos)
-		
-	def touch_began(self,touch):
-		self.keypad.isButtonPressed(touch)
-		
-	def touch_ended(self,touch):
-		self.keypad.isNotPressed()
-		
-#run(Test())
