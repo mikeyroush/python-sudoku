@@ -1,5 +1,6 @@
 from scene import *
 from adjustColor import *
+from touch import *
 import math
 
 class Space(ShapeNode):
@@ -13,13 +14,14 @@ class Space(ShapeNode):
 		self.index = index
 		self.hex = hex
 		
-	def isTouched(self,point):
+	def isPressed(self,point):
 		if not self.locked:
-			(x,y) = point
-			(X,Y) = self.position
-			bound = self.size.w/2
-			return X - bound < x and X + bound > x and Y - bound < y and Y + bound > y
+			return isTouched(self,point)
 		return False
+		
+	def adjustFont(self):
+		font = ('Helvetica', min(self.size.w,self.size.h)*0.9)
+		self.charactar.font = font
 		
 	def fill(self, char):
 		self.locked = True
@@ -41,7 +43,7 @@ class Border(ShapeNode):
 		(x,y,dx,dy) = self.dimensions
 		#draw line and return ShapeNode
 		line = ui.Path()
-		line.line_width = 10
+		line.line_width = max(dx,dy)/80
 		line.move_to(0,0)
 		line.line_to(dx,dy)
 		line.close()
@@ -70,6 +72,7 @@ class Board(ShapeNode):
 			pos = self.calcDimensions(space.index)
 			space.path = square
 			space.position = pos
+			space.adjustFont()
 			
 	def placeBorders(self):
 		for i, border in enumerate(self.vertBorders,1):
@@ -89,10 +92,10 @@ class Board(ShapeNode):
 		y = +self.size.h/2 - self.colSize/2 - j*self.colSize
 		return (x,y)
 		
-	def isSpaceTouched(self,touch):
+	def isSpacePressed(self,touch):
 		point = self.point_from_scene(touch.location)
 		for space in self.spaces:
-			if space.isTouched(point):
+			if space.isPressed(point):
 				self.makeActive(space)
 				
 	def makeActive(self, space):
