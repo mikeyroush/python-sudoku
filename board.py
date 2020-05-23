@@ -7,12 +7,16 @@ class Space(ShapeNode):
 	def __init__(self,index,hex,*args,**kwargs):
 		ShapeNode.__init__(self,*args,**kwargs)
 		self.fill_color = hex
-		font = ('Helvetica', min(self.size.w,self.size.h)*0.9)
+		mainFont = ('Helvetica', min(self.size.w,self.size.h)*0.9)
+		noteFont = ('Helvetica', min(self.size.w,self.size.h)*0.25)
 		startCharacter = ""
-		self.charactar = LabelNode(startCharacter,font=font,parent=self)
+		self.charactar = LabelNode(startCharacter,font=mainFont,parent=self)
 		self.locked = False
 		self.index = index
 		self.hex = hex
+		self.notes = [LabelNode(startCharacter,font=noteFont,parent=self) for i in range(4)]
+		self.placeNotes()
+		self.noteIndex = 0
 		
 	def isPressed(self,point):
 		if not self.locked:
@@ -20,13 +24,43 @@ class Space(ShapeNode):
 		return False
 		
 	def adjustFont(self):
-		font = ('Helvetica', min(self.size.w,self.size.h)*0.9)
-		self.charactar.font = font
+		mainFont = ('Helvetica', min(self.size.w,self.size.h)*0.9)
+		noteFont = ('Helvetica', min(self.size.w,self.size.h)*0.25)
+		self.charactar.font = mainFont
+		for note in self.notes:
+			note.font = noteFont
+		self.placeNotes()
+		
+	def placeNotes(self):
+		for i, note in enumerate(self.notes):
+			note.position=(-self.size.w/2+(1/2+i%2)*note.font[1],self.size.h/2-(1/2+i//2)*note.font[1])
+		
+	def fillLocked(self, char):
+		self.locked = True
+		self.fill(char)
+		self.fill_color = adjustColor(self.hex, 1.2)
 		
 	def fill(self, char):
-		self.locked = True
-		self.charactar.text = str(char)
-		self.fill_color = adjustColor(self.hex, 1.2)
+		self.eraseNote()
+		self.charactar.text = str(char)		
+		
+	def fillNote(self, char):
+		self.eraseGuess()
+		if self.noteIndex >= 4:
+			self.noteIndex = 0
+		self.notes[self.noteIndex].text = str(char)
+		self.noteIndex += 1
+		
+	def erase(self):
+		self.eraseGuess()
+		self.eraseNote()
+			
+	def eraseGuess(self):
+		self.charactar.text = ""		
+		
+	def eraseNote(self):
+		for note in self.notes:
+			note.text = ""		
 		
 	def activate(self):
 		self.fill_color = adjustColor(self.hex, 0.75)
@@ -109,4 +143,13 @@ class Board(ShapeNode):
 		for space in self.spaces:
 			(j,i) = space.index
 			if grid[j][i] != 0:
-				space.fill(grid[j][i])
+				space.fillLocked(grid[j][i])
+				
+	def placeGuess(self, button):
+		self.activeSpace.fill(button.id)
+		
+	def placeNote(self, button):
+		self.activeSpace.fillNote(button.id)
+		
+	def eraseSpaceContents(self):
+		self.activeSpace.erase()

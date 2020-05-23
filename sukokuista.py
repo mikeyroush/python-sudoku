@@ -19,6 +19,7 @@ class sudokuGui(Scene):
 		self.board = Board((9,9),hex,self.square,stroke_color=self.color,parent=self,position=self.boardPos)
 		self.initializeBoard()
 		self.keyPad = KeyPad(hex,self.rect,stroke_color=self.color,fill_color='clear',parent=self,position=self.keyPadPos)
+		self.winText = LabelNode()
 		
 	def did_change_size(self):
 		self.fitScreen()
@@ -54,16 +55,22 @@ class sudokuGui(Scene):
 			width = math.floor(0.9 * sideDiff)
 			height = 4*width/3
 			self.keyPadPos=(self.size.w - sideDiff/2 - margin/2, self.size.h - availableSize/2)
-		self.rect = ui.Path.rect(0,0,width,height)			
+		self.rect = ui.Path.rect(0,0,width,height)		
+		
+		#calc font size
+		#self.mainFont = ('Helvetica', 	
 	
 	def touch_began(self,touch):
-		if self.board.isSpacePressed(touch) and self.keyPad.activeButton and self.keyPad.activeButton.id == 'erase':
-			self.board.activeSpace.charactar.text = ""
 		self.keyPad.isModeButtonPressed(touch)
-		if self.keyPad.activeButton and self.keyPad.activeButton.id == 'write' and self.board.activeSpace:
+		if self.board.isSpacePressed(touch) and self.keyPad.activeButton and self.keyPad.activeButton.id == 'erase':
+			self.board.eraseSpaceContents()
+		elif self.keyPad.activeButton and self.board.activeSpace:
 			numberButton = self.keyPad.isNumberButtonPressed(touch)
 			if numberButton:
-				self.board.activeSpace.charactar.text = str(numberButton.id)
+				if self.keyPad.activeButton.id == 'write':
+					self.board.placeGuess(numberButton)
+				elif self.keyPad.activeButton.id == 'note':
+					self.board.placeNote(numberButton)
 		
 	def touch_ended(self,touch):
 		self.keyPad.isNotPressed()
