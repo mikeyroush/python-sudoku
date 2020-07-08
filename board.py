@@ -51,6 +51,11 @@ class Space(ShapeNode):
 		self.notes[self.noteIndex].text = str(char)
 		self.noteIndex += 1
 		
+	def clear(self):
+		self.erase()
+		self.locked = False
+		self.fill_color = self.hex
+		
 	def erase(self):
 		self.eraseGuess()
 		self.eraseNote()
@@ -144,6 +149,10 @@ class Board(ShapeNode):
 			(j,i) = space.index
 			if grid[j][i] != 0:
 				space.fillLocked(grid[j][i])
+				
+	def clearSpaces(self):
+		for space in self.spaces:
+			space.clear()
 				
 	def placeGuess(self, button):
 		self.activeSpace.fill(button.id)

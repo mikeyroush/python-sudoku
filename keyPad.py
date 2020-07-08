@@ -8,10 +8,10 @@ class KeyPad(ShapeNode):
 		ShapeNode.__init__(self,*args,**kwargs)
 		self.buttonSize = min(self.size.w,self.size.h)/3
 		square = ui.Path.rect(0,0,self.buttonSize,self.buttonSize)
-		self.numberButtons = [Button(i,hex,square,fill_color='clear',stroke_color='white',parent=self,position=(i*10,i*10)) for i in range(1,10)]
+		self.numberButtons = [Button(i,hex,square,stroke_color='white',parent=self,position=(i*10,i*10)) for i in range(1,10)]
 		buttonNames = "write note erase"
 		buttonNames = buttonNames.split(" ")
-		self.modeButtons = [Button(buttonNames[i],hex,square,fill_color='clear',stroke_color='white',parent=self,position=(i*10,i*10)) for i in range(len(buttonNames))]
+		self.modeButtons = [Button(buttonNames[i],hex,square,stroke_color='white',parent=self,position=(i*10,i*10)) for i in range(len(buttonNames))]
 		self.activeButton = None
 		self.placeButtons()
 		

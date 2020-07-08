@@ -2,6 +2,8 @@ from sudoku import *
 from board import *
 from keyPad import *
 from scene import *
+from menu import *
+from adjustColor import *
 import math
 
 def muchLarger(x,y):
@@ -12,14 +14,24 @@ class sudokuGui(Scene):
 	def setup(self):
 		#build board
 		self.color = 'white'
-		hex = '#1768ff'
-		self.background_color = hex
-		self.sudoku = Sudoku()
+		self.hex = '#1768ff'
+		self.background_color = self.hex
 		self.fitScreen()
-		self.board = Board((9,9),hex,self.square,stroke_color=self.color,parent=self,position=self.boardPos)
-		self.initializeBoard()
-		self.keyPad = KeyPad(hex,self.rect,stroke_color=self.color,fill_color='clear',parent=self,position=self.keyPadPos)
-		self.winText = LabelNode()
+		self.board = Board((9,9),self.hex,self.square,stroke_color=self.color,parent=self,position=self.boardPos)
+		#build keypad
+		self.keyPad = KeyPad(self.hex,self.rect,stroke_color=self.color,fill_color='clear',parent=self,position=self.keyPadPos)
+		#build menu
+		self.menuItems = "easy medium hard".split(" ")
+		self.prompt = 'Play Again?'
+		self.dims = [400,300,250,50]
+		self.menu = Menu(adjustColor(self.hex,1.2),self.prompt,self.menuItems,self.dims,stroke_color='white')
+		self.placeMenu()
+		
+	def placeMenu(self):
+		(w,h) = self.size
+		self.add_child(self.menu)
+		self.menu.position = (w/2,h/2)
+		self.menu.placeMenuItems()
 		
 	def did_change_size(self):
 		self.fitScreen()
@@ -61,21 +73,42 @@ class sudokuGui(Scene):
 		#self.mainFont = ('Helvetica', 	
 	
 	def touch_began(self,touch):
-		self.keyPad.isModeButtonPressed(touch)
-		if self.board.isSpacePressed(touch) and self.keyPad.activeButton and self.keyPad.activeButton.id == 'erase':
-			self.board.eraseSpaceContents()
-		elif self.keyPad.activeButton and self.board.activeSpace:
-			numberButton = self.keyPad.isNumberButtonPressed(touch)
-			if numberButton:
-				if self.keyPad.activeButton.id == 'write':
-					self.board.placeGuess(numberButton)
-				elif self.keyPad.activeButton.id == 'note':
-					self.board.placeNote(numberButton)
+		if self.menu.isActive:
+			button = self.menu.isButtonPressed(touch)
+			if button:
+				self.initializeBoard(button.id)
+				self.menu.isActive = False
+				self.menu.remove_from_parent()
+				button.deactivate()
+		else:
+			self.keyPad.isModeButtonPressed(touch)
+			if self.board.isSpacePressed(touch) and self.keyPad.activeButton and self.keyPad.activeButton.id == 'erase':
+				self.board.eraseSpaceContents()
+			elif self.keyPad.activeButton and self.board.activeSpace:
+				numberButton = self.keyPad.isNumberButtonPressed(touch)
+				if numberButton:
+					if self.keyPad.activeButton.id == 'write':
+						self.board.placeGuess(numberButton)
+						self.checkSolution()
+					elif self.keyPad.activeButton.id == 'note':
+						self.board.placeNote(numberButton)
 		
 	def touch_ended(self,touch):
 		self.keyPad.isNotPressed()
 		
-	def initializeBoard(self):
+	def initializeBoard(self,difficulty):
+		self.board.clearSpaces()
+		self.sudoku = Sudoku(difficulty)
 		self.board.fillSpaces(self.sudoku.grid)
+		
+	def checkSolution(self):
+		isSolved = True
+		for space in self.board.spaces:
+			(j,i) = space.index
+			if self.sudoku.grandSolution[j][i] != int(space.charactar.text):
+				isSolved = False
+				break
+		if isSolved:
+			self.placeMenu()
 		
 run(sudokuGui())

@@ -4,7 +4,7 @@ from copy import deepcopy
 
 class Sudoku:
 	
-	def __init__(self):
+	def __init__(self,difficulty):
 		#test grid
 		"""self.grid = [[5,3,0,0,7,0,0,0,0],
 					[6,0,0,1,9,5,0,0,0],
@@ -15,7 +15,12 @@ class Sudoku:
 					[0,6,0,0,0,0,2,8,0],
 					[0,0,0,4,1,9,0,0,5],
 					[0,0,0,0,8,0,0,7,9]]"""
-		self.blanks = randrange(40,50)
+		levels = {
+			'easy': randrange(20,30),
+			'medium': randrange(30,40),
+			'hard': randrange(40,50)
+		}
+		self.blanks = levels[difficulty]
 		self.solutions = []
 		self.grandSolution = None
 		self.grid = None
@@ -120,6 +125,6 @@ class Sudoku:
 		return True
 		
 #Main
-#sudoku = Sudoku()
+#sudoku = Sudoku('medium')
 #print(np.matrix(sudoku.grid))
 #print(np.matrix(sudoku.grandSolution))
