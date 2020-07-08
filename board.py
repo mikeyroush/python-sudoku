@@ -35,10 +35,12 @@ class Space(ShapeNode):
 		for i, note in enumerate(self.notes):
 			note.position=(-self.size.w/2+(1/2+i%2)*note.font[1],self.size.h/2-(1/2+i//2)*note.font[1])
 		
-	def fillLocked(self, char):
+	def fillLocked(self, char, color=None):
 		self.locked = True
 		self.fill(char)
-		self.fill_color = adjustColor(self.hex, 1.2)
+		if color == None:
+			color = adjustColor(self.hex, 1.2)
+		self.fill_color = color
 		
 	def fill(self, char):
 		self.eraseNote()

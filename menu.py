@@ -35,27 +35,9 @@ class Menu(ShapeNode):
 			if button.isPressed(point):
 				return button
 		
-'''class Test(Scene):
-	def setup(self):
-		hex = '#ff527f'
-		menuItems = "easy medium hard".split(" ")
-		prompt = 'Play Again?'
-		dims = [400,300,250,50]
-		self.menu = Menu(hex,prompt,menuItems,dims,stroke_color='white',parent=self)
-		self.placeMenu()
-		
-	def placeMenu(self):
-		(w,h) = self.size
-		self.menu.position = (w/2,h/2)
-		self.menu.placeMenuItems()
-		
-	def did_change_size(self):
-		self.placeMenu()
-		
-	def touch_began(self,touch):
-		button = self.menu.isButtonPressed(touch)
-		if button:
-			#choose setting and delete menu
-			pass
-		
-run(Test())'''
+	def isNotPressed(self):
+		for button in self.buttons:
+			if button.active:
+				button.deactivate()
+				return button.id
+		return None
