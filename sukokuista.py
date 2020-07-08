@@ -32,6 +32,7 @@ class sudokuGui(Scene):
 	def place_menu(self):
 		(w,h) = self.size
 		self.add_child(self.menu)
+		self.menu.isActive = True
 		self.menu.position = (w/2,h/2)
 		self.menu.placeMenuItems()
 		
@@ -118,7 +119,7 @@ class sudokuGui(Scene):
 				isSolved = False
 				break
 		if isSolved:
-			self.placeMenu()
+			self.place_menu()
 			
 	def solve_game(self):
 		for space in self.board.spaces:
